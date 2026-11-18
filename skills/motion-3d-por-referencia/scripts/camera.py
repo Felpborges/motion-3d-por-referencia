@@ -34,6 +34,7 @@ A saída inclui o erro em pixels por ponto e uma tabela de erro × campo de vis�
 15° e 45°, os pontos não prendem a lente: diga isso na perícia e escolha a lente pela deformação que se vê (seção
 "Lente" de references/pericia-3d.md).
 """
+import _utf8  # noqa: F401  (Windows: garante UTF-8 antes de qualquer leitura ou escrita)
 import argparse
 import json
 import sys

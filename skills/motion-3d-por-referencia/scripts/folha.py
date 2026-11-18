@@ -7,6 +7,7 @@
 Revisar um motion é olhar quadros parados, quatro por segundo: é assim que aparecem peça atravessando outra, texto
 cortado, objeto fora do quadro, corte no lugar errado. Olhe a folha inteira antes de mostrar qualquer coisa.
 """
+import _utf8  # noqa: F401  (Windows: garante UTF-8 antes de qualquer leitura ou escrita)
 import argparse
 import re
 import sys

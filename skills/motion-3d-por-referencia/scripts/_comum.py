@@ -3,6 +3,7 @@
 Tudo é medido nos pixels decodificados (numpy), do mesmo jeito para a referência e para o nosso filme. Uma medida só
 vale como comparação quando os dois lados passaram pela mesma régua.
 """
+import _utf8  # noqa: F401
 import json
 import shutil
 import subprocess
@@ -13,7 +14,7 @@ try:
     import numpy as np
     from PIL import Image, ImageDraw, ImageFont
 except ImportError:  # pragma: no cover
-    sys.exit("erro: faltam numpy e Pillow. Instale com: python3 -m pip install numpy pillow")
+    sys.exit("erro: faltam numpy e Pillow. Instale com: python3 -m pip install numpy pillow   (no Windows: python -m pip install numpy pillow)")
 
 BALDE = 0.5          # segundos por balde do perfil de energia
 LUMA = (0.2126, 0.7152, 0.0722)
@@ -22,7 +23,8 @@ LUMA = (0.2126, 0.7152, 0.0722)
 def precisa(*ferramentas):
     for f in ferramentas:
         if not shutil.which(f):
-            sys.exit("erro: '%s' não encontrado. Instale antes de continuar (no Mac: brew install %s)." % (f, "ffmpeg" if f.startswith("ff") else f))
+            pacote = "ffmpeg" if f.startswith("ff") else f
+            sys.exit("erro: '%s' não encontrado. Instale antes de continuar (Mac: brew install %s · Windows: winget install %s)." % (f, pacote, {"ffmpeg": "Gyan.FFmpeg", "yt-dlp": "yt-dlp.yt-dlp"}.get(pacote, pacote)))
 
 
 def sonda(video):

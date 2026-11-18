@@ -8,8 +8,10 @@ puppeteer-core e a fonte). DESTINO pode já existir se só tiver `pericia/` e `r
 os dois precisam das mesmas versões).
 Depois: cd DESTINO && node render.mjs cards   (a cena de exemplo tem que renderizar antes de você mexer em qualquer coisa).
 """
+import _utf8  # noqa: F401  (Windows: garante UTF-8 antes de qualquer leitura ou escrita)
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -54,20 +56,28 @@ def main():
         alvo = Path(a.link).expanduser().resolve()
         if not (alvo / "three").exists():
             sys.exit("erro: %s não parece um node_modules com three." % alvo)
-        (dest / "node_modules").symlink_to(alvo)
+        try:
+            (dest / "node_modules").symlink_to(alvo, target_is_directory=True)
+        except OSError:
+            # Windows sem permissão para criar atalho de pasta: tenta uma junção; se não der, instala normalmente
+            feito = os.name == "nt" and subprocess.run(["cmd", "/c", "mklink", "/J", str(dest / "node_modules"), str(alvo)], capture_output=True).returncode == 0
+            if not feito:
+                print("aviso: não consegui criar o atalho para %s; instalando as dependências no projeto." % alvo)
+                a.link = None
         if not (alvo / "@fontsource" / "inter").exists():
             print("aviso: o node_modules apontado não tem @fontsource/inter; a cena de exemplo usa essa fonte.")
-    elif not a.sem_instalar:
-        if not shutil.which("npm"):
+    if not a.link and not a.sem_instalar:
+        npm = shutil.which("npm")                # no Windows é npm.cmd: precisa do caminho completo
+        if not npm:
             sys.exit("erro: npm não encontrado. Instale o Node (https://nodejs.org) e rode `npm install` em %s." % dest)
-        r = subprocess.run(["npm", "install", "--no-audit", "--no-fund", "--loglevel=error"], cwd=dest)
+        r = subprocess.run([npm, "install", "--no-audit", "--no-fund", "--loglevel=error"], cwd=dest)
         if r.returncode != 0:
             sys.exit("erro: `npm install` falhou em %s." % dest)
     for f in ("ffmpeg", "node"):
         if not shutil.which(f):
             print("aviso: '%s' não encontrado; o render precisa dele." % f)
     print("projeto criado: %s · %d×%d · %d qps" % (dest, w, h, a.fps))
-    print("próximo: cd %r && node render.mjs cards" % str(dest))
+    print('próximo: cd "%s" && node render.mjs cards' % dest)
 
 
 if __name__ == "__main__":

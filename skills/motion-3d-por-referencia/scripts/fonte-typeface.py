@@ -6,6 +6,7 @@ só com os glifos que o filme usa. Para texto que mora no mundo 3D (letreiro ext
 
 Precisa de fontTools (python3 -m pip install fonttools). Confira a licença da fonte antes de embarcar no projeto.
 """
+import _utf8  # noqa: F401  (Windows: garante UTF-8 antes de qualquer leitura ou escrita)
 import sys, json
 if len(sys.argv) < 5:
     sys.exit(__doc__)

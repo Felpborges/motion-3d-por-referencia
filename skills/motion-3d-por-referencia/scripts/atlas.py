@@ -11,6 +11,7 @@ pericia-da-referencia.md), as peças e a cena existem (codigo/), e o trabalho é
 
 O atlas vem dentro da skill, na pasta `atlas/`. A variável MOTION_ATLAS aponta para outro atlas, se você tiver um.
 """
+import _utf8  # noqa: F401  (Windows: garante UTF-8 antes de qualquer leitura ou escrita)
 import json
 import os
 import sys
@@ -40,9 +41,11 @@ def abrir(r, todos, de_verdade=True):
     if not pagina.exists():
         print("O atlas está em %s, mas a página index.html não foi gerada (rode montar-galeria.py lá)." % r)
     elif de_verdade:
-        cmd = ["open", str(pagina)] if sys.platform == "darwin" else ["cmd", "/c", "start", "", str(pagina)] if os.name == "nt" else [shutil.which("xdg-open") or "xdg-open", str(pagina)]
         try:
-            subprocess.run(cmd, check=False)
+            if os.name == "nt":
+                os.startfile(str(pagina))                       # abre no navegador padrão do Windows
+            else:
+                subprocess.run(["open", str(pagina)] if sys.platform == "darwin" else [shutil.which("xdg-open") or "xdg-open", str(pagina)], check=False)
             print("atlas aberto no navegador: %s\n" % pagina)
         except Exception as e:
             print("não consegui abrir o navegador (%s). Abra à mão: %s\n" % (e, pagina))

@@ -12,7 +12,7 @@ description: |
   para motion 2D em HTML/GSAP/HyperFrames (motion-por-referencia) nem para edição de gravação.
 metadata:
   author: Felipe Borges
-  version: "2.0"
+  version: "2.1"
 ---
 
 # Motion 3D por referência (three.js)
@@ -22,7 +22,10 @@ Nos testes que deram origem a esta versão, uma cena complexa levou 2h15 porque 
 abaixo, e teve os objetos refeitos um a um depois. Feita do segundo jeito desde o começo (cada objeto isolado, em
 paralelo, e a cena montada ao mesmo tempo), ela cabe em menos da metade disso. Este arquivo descreve esse jeito.
 
-`$SKILL` é a pasta desta skill. Leia agora `references/essencial.md` (uma página: a ficha, a API do modelo, as dez
+`$SKILL` é a pasta desta skill (`~/.claude/skills/motion-3d-por-referencia`; no Windows,
+`%USERPROFILE%\.claude\skills\motion-3d-por-referencia`). **No Windows**, troque `python3` por `python` (ou `py -3`)
+nos comandos, use o caminho da skill entre aspas, e sirva-se do Edge se não houver Chrome: o resto é igual. Leia
+agora `references/essencial.md` (uma página: a ficha, a API do modelo, as dez
 regras de three.js e a revisão de um minuto). As outras referências você só abre se travar num ponto específico.
 
 > **Regra-mãe.** Da referência vêm o método e a sensação: mecanismo, composição, câmera, luz, ritmo, acabamento.

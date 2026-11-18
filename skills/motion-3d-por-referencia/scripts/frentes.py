@@ -13,6 +13,7 @@ enquanto as outras frentes e a cena avançam ao mesmo tempo. Foi assim que o res
 visto de perto, de quatro lados, antes de entrar na cena. Escrever esses pedidos à mão custa minutos e sai desigual;
 por isso eles nascem da planta.
 """
+import _utf8  # noqa: F401  (Windows: garante UTF-8 antes de qualquer leitura ou escrita)
 import json
 import sys
 from pathlib import Path

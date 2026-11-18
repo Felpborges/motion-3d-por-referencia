@@ -29,6 +29,7 @@
 As coordenadas são do quadro extraído pela perícia (quadros/regua-NN.jpg mostra a régua). O que estas medidas viram
 no three.js está em references/pericia-3d.md.
 """
+import _utf8  # noqa: F401  (Windows: garante UTF-8 antes de qualquer leitura ou escrita)
 import argparse
 import math
 import sys

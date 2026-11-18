@@ -9,6 +9,7 @@ ferramentas) e `referencia/` (o comando /referencia, que abre o Atlas). Quem ins
 
 Antes de empacotar, atualize o Atlas (`empacotar-atlas.py`) se o acervo mudou.
 """
+import _utf8  # noqa: F401  (Windows: garante UTF-8 antes de qualquer leitura ou escrita)
 import argparse
 import re
 import sys

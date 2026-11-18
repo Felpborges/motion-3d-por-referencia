@@ -11,6 +11,7 @@ de MB e o Atlas da skill precisa caber num download. No fim escreve `atlas/index
 Rode de novo sempre que um motion for aprovado ou alterado no acervo. Não entram: node_modules, vídeos de referência
 de terceiros, nem nada fora das pastas NN-nome.
 """
+import _utf8  # noqa: F401  (Windows: garante UTF-8 antes de qualquer leitura ou escrita)
 import argparse
 import html
 import json

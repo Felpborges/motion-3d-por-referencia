@@ -14,6 +14,7 @@ para aparecer ao lado do nosso card: é o jeito mais rápido de a pessoa julgar 
 A página recusa sair com campos "TROCAR" sobrando ou com card sem imagem: página de aprovação pela metade faz a
 pessoa aprovar o que não viu.
 """
+import _utf8  # noqa: F401  (Windows: garante UTF-8 antes de qualquer leitura ou escrita)
 import base64
 import html
 import json

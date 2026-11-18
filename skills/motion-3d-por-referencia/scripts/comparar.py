@@ -25,6 +25,7 @@ Durações diferentes: os instantes são casados em proporção (metade do nosso
 {"amplitude": [1.2, 2.6], "quase_parada_min": 0, "energia_fim_max": 0.5}.
 Sai com código 1 se algum portão reprovar.
 """
+import _utf8  # noqa: F401  (Windows: garante UTF-8 antes de qualquer leitura ou escrita)
 import argparse
 import json
 import sys

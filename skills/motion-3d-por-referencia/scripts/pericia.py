@@ -21,6 +21,7 @@ paleta perceptual, fundo), nitidez por faixa (profundidade de campo), vinheta e 
 O que NÃO mede (e por isso é pendência sua): lente e posição da câmera, direção e dureza da luz, materiais,
 proporções, mecanismo. Para isso existem camera.py e sonda.py, e o roteiro em references/pericia-3d.md.
 """
+import _utf8  # noqa: F401  (Windows: garante UTF-8 antes de qualquer leitura ou escrita)
 import argparse
 import json
 import shutil

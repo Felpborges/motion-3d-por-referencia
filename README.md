@@ -6,22 +6,38 @@ prévia em vídeo, o método e o código.
 
 ## Instalar
 
-No Terminal (Mac ou Linux):
+**Mac ou Linux**, no Terminal:
 
 ```bash
 git clone --depth 1 https://github.com/Felpborges/motion-3d-por-referencia.git /tmp/motion-3d && bash /tmp/motion-3d/instalar.sh
 ```
 
-No Windows, ou sem git: baixe o repositório (botão **Code → Download ZIP**), descompacte e copie as duas pastas de
-dentro de `skills/` (`motion-3d-por-referencia` e `referencia`) para a pasta de skills do Claude Code
-(`~/.claude/skills` no Mac e no Linux, `%USERPROFILE%\.claude\skills` no Windows).
+**Windows**, no PowerShell:
 
-Depois, abra uma conversa nova no Claude Code.
+```powershell
+git clone --depth 1 https://github.com/Felpborges/motion-3d-por-referencia.git "$env:TEMP\motion-3d"; powershell -ExecutionPolicy Bypass -File "$env:TEMP\motion-3d\instalar.ps1"
+```
+
+**Sem git** (qualquer sistema): baixe o repositório pelo botão **Code → Download ZIP** e descompacte. No Windows, dê
+dois cliques em `instalar.bat`; no Mac ou Linux, rode `bash instalar.sh` dentro da pasta. Ou copie à mão as duas
+pastas de dentro de `skills/` (`motion-3d-por-referencia` e `referencia`) para a pasta de skills do Claude Code:
+`~/.claude/skills` no Mac e no Linux, `%USERPROFILE%\.claude\skills` no Windows.
+
+Depois, abra uma conversa nova no Claude Code. Para atualizar, repita a instalação: ela troca a versão anterior.
 
 ### O que precisa estar instalado
 
-Node, Python 3 (com `numpy`, `pillow` e `scipy`), ffmpeg e o Google Chrome. Para baixar referência por link,
-também o `yt-dlp`.
+Node, Python 3 (com `numpy`, `pillow` e `scipy`), ffmpeg e um navegador Chromium (Google Chrome; no Windows serve o
+Edge, que já vem instalado). Para baixar referência por link, também o `yt-dlp`.
+
+| | Mac | Windows |
+|---|---|---|
+| Programas | `brew install node python ffmpeg yt-dlp` | `winget install OpenJS.NodeJS.LTS Python.Python.3.12 Gyan.FFmpeg yt-dlp.yt-dlp` |
+| Bibliotecas do Python | `python3 -m pip install numpy pillow scipy` | `python -m pip install numpy pillow scipy` |
+
+No Windows, feche e abra o terminal depois de instalar os programas, para eles entrarem no caminho. A skill foi
+feita e testada no Mac; o caminho do Windows está preparado, mas ainda não foi testado numa máquina Windows: se algo
+falhar, abra uma issue com a mensagem de erro.
 
 ## Usar
 
@@ -58,7 +74,8 @@ skills/motion-3d-por-referencia/    a skill: instruções, ferramentas, modelo d
   scripts/                          medição da referência, câmera, comparação, banco de peças
   references/                       regras de three.js, receitas por estilo, revisão
 skills/referencia/                  o comando /referencia
-instalar.sh                         copia as duas pastas para ~/.claude/skills
+instalar.sh                         instala no Mac e no Linux
+instalar.ps1 · instalar.bat         instala no Windows
 ```
 
 ## Avisos

@@ -22,6 +22,8 @@ zero não passa por aqui.
 python3 ~/.claude/skills/motion-3d-por-referencia/scripts/atlas.py abrir
 ```
 
+   No Windows: `python "%USERPROFILE%\.claude\skills\motion-3d-por-referencia\scripts\atlas.py" abrir`.
+
    (O Atlas mora dentro da skill `motion-3d-por-referencia`, na pasta `atlas/`, e as duas vêm no mesmo pacote. Se a
    skill estiver instalada em outro lugar, a pasta dela é a irmã desta: `../motion-3d-por-referencia/`.)
 

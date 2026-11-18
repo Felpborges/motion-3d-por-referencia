@@ -50,13 +50,16 @@ const server = http.createServer((req, res) => {
 await new Promise(r => server.listen(0, '127.0.0.1', r));
 const port = server.address().port;
 
+// Qualquer navegador da família Chromium serve. No Windows, o Edge já vem instalado e entra como reserva.
+const WIN = [process.env.PROGRAMFILES, process.env['PROGRAMFILES(X86)'], process.env.LOCALAPPDATA].filter(Boolean);
 const CHROME = [process.env.CHROME_PATH,
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-  'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-  '/usr/bin/google-chrome', '/usr/bin/chromium-browser', '/usr/bin/chromium',
+  ...WIN.map(d => path.join(d, 'Google', 'Chrome', 'Application', 'chrome.exe')),
+  '/usr/bin/google-chrome', '/usr/bin/google-chrome-stable', '/usr/bin/chromium-browser', '/usr/bin/chromium',
+  '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
+  ...WIN.map(d => path.join(d, 'Microsoft', 'Edge', 'Application', 'msedge.exe')),
 ].find(p => p && fs.existsSync(p));
-if (!CHROME) { console.error('Chrome não encontrado. Instale o Google Chrome ou defina CHROME_PATH.'); process.exit(1); }
+if (!CHROME) { console.error('Navegador não encontrado. Instale o Google Chrome (ou o Edge) ou defina CHROME_PATH com o caminho do executável.'); process.exit(1); }
 
 const browser = await puppeteer.launch({
   executablePath: CHROME,
@@ -91,6 +94,10 @@ const PNG = ALFA || !!flags.png, EXT = PNG ? 'png' : 'jpg';
 async function quadro(t) { return page.evaluate((t, png, q) => { window.renderAt(t); return window.grab(q, png ? 'png' : 'jpeg'); }, t, PNG, 0.97); }
 async function salvar(t, file) { fs.writeFileSync(file, Buffer.from(await quadro(t), 'base64')); }
 const nomeT = t => 't' + t.toFixed(2).padStart(6, '0');
+function ffmpeg(args) {
+  try { execFileSync('ffmpeg', args, { stdio: ['ignore', 'inherit', 'inherit'] }); }
+  catch (e) { console.error(e.code === 'ENOENT' ? 'ffmpeg não encontrado. Instale (Mac: brew install ffmpeg · Windows: winget install Gyan.FFmpeg) e abra um terminal novo.' : 'o ffmpeg falhou ao juntar os quadros (eles ficaram em out/frames).'); process.exit(1); }
+}
 
 if (mode === 'peca') {
   const dir = path.join(ROOT, 'out', 'pecas'); fs.mkdirSync(dir, { recursive: true });
@@ -181,7 +188,7 @@ if (mode === 'video') {
   let out;
   if (ALFA) {
     out = path.join(ROOT, 'out', `${CFG.nome}${trecho}-alfa.mov`);
-    execFileSync('ffmpeg', [...entrada, '-c:v', 'prores_ks', '-profile:v', '4444', '-pix_fmt', 'yuva444p10le', '-vendor', 'apl0', out]);
+    ffmpeg([...entrada, '-c:v', 'prores_ks', '-profile:v', '4444', '-pix_fmt', 'yuva444p10le', '-vendor', 'apl0', out]);
   } else {
     out = path.join(ROOT, 'out', `${CFG.nome}${trecho}.mp4`);
     // Os quadros JPEG vêm em BT.601 de faixa cheia. Sem conversão, o ffmpeg grava o MP4 marcado como BT.601 faixa cheia,
@@ -191,7 +198,7 @@ if (mode === 'video') {
     const marca = ',setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv';   // sem isto, primárias e curva saem "unknown" no arquivo
     const conv = (PNG ? 'scale=out_color_matrix=bt709:out_range=tv:flags=accurate_rnd+full_chroma_int'
       : 'scale=in_color_matrix=bt601:in_range=full:out_color_matrix=bt709:out_range=tv:flags=accurate_rnd+full_chroma_int+full_chroma_inp') + marca;
-    execFileSync('ffmpeg', [...entrada, '-vf', conv, '-c:v', 'libx264', '-crf', '14', '-preset', 'slow', '-pix_fmt', 'yuv420p', '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv', '-movflags', '+faststart', out]);
+    ffmpeg([...entrada, '-vf', conv, '-c:v', 'libx264', '-crf', '14', '-preset', 'slow', '-pix_fmt', 'yuv420p', '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv', '-movflags', '+faststart', out]);
   }
   if (!flags.manter && !flags.continuar) fs.rmSync(dir, { recursive: true, force: true });
   console.log('vídeo', path.relative(ROOT, out), '·', n, 'quadros ·', ((Date.now() - tv) / 1000).toFixed(0) + 's');
