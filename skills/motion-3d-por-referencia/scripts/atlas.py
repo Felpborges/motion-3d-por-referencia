@@ -42,11 +42,9 @@ def abrir(r, todos, de_verdade=True):
         print("O atlas está em %s, mas a página index.html não foi gerada (rode montar-galeria.py lá)." % r)
     elif de_verdade:
         try:
-            if os.name == "nt":
-                os.startfile(str(pagina))                       # abre no navegador padrão do Windows
-            else:
-                subprocess.run(["open", str(pagina)] if sys.platform == "darwin" else [shutil.which("xdg-open") or "xdg-open", str(pagina)], check=False)
-            print("atlas aberto no navegador: %s\n" % pagina)
+            # por HTTP local, não file://: o navegador só recebia o index.html e não lia os vídeos ao lado (tela preta, 0:00)
+            subprocess.run([sys.executable, str(Path(__file__).resolve().parent / "servir_atlas.py"), str(r)], check=True)
+            print("atlas aberto no navegador\n")
         except Exception as e:
             print("não consegui abrir o navegador (%s). Abra à mão: %s\n" % (e, pagina))
     else:

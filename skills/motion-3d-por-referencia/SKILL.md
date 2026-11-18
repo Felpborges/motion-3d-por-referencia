@@ -213,7 +213,8 @@ scripts/sonda.py                   luz, sombra, cor e área em números, a parti
 scripts/novo-projeto.py            cria o projeto a partir do modelo
 scripts/frentes.py                 da planta aos pedidos de cada frente, com o recorte de cada peça
 scripts/atlas.py                   abre e lista o atlas e dá o ponto de partida de um item
-scripts/empacotar-atlas.py         (para quem mantém a skill) refaz atlas/ a partir do acervo de aprovados
+scripts/servir_atlas.py            serve o atlas em http://localhost e abre o navegador (é o que `atlas.py abrir` usa)
+scripts/empacotar-atlas.py         (para quem mantém a skill) refaz atlas/ a partir do acervo da skill gratuita; recusa outro acervo
 scripts/empacotar-skill.py         (para quem mantém a skill) gera o .zip único de instalação
 scripts/folha.py                   folha de quadros de um vídeo ou de uma pasta
 scripts/comparar.py                aceite contra a referência (vídeo ou imagem)

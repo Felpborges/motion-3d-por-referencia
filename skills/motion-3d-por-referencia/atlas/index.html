@@ -38,7 +38,7 @@ main { max-width:1320px; margin:0 auto; padding:22px 28px 90px; }
   <div class="tema"><label for="tema">Seu tema (opcional)</label><input id="tema" placeholder="ex.: o que tem dentro de uma garrafa térmica, 8 s, vertical"></div>
 </div></header>
 <main>
-  <p class="sub">18 estilos feitos só com código (three.js). Passe o mouse ou toque para ver o movimento. Escolha um, clique em <b>Usar este estilo</b> e cole no Claude: ele parte do código pronto daquele motion e troca o conteúdo pelo seu tema. Do exemplo ficam a técnica, a edição e o ritmo; tema, textos, duração e formato são seus.</p>
+  <p class="sub">18 estilos feitos só com código (three.js). Todos rodam em laço; clique num vídeo para pausar. Escolha um, clique em <b>Usar este estilo</b> e cole no Claude: ele parte do código pronto daquele motion e troca o conteúdo pelo seu tema. Do exemplo ficam a técnica, a edição e o ritmo; tema, textos, duração e formato são seus.</p>
   <div class="grade" id="grade"></div>
 </main>
 <div id="aviso"></div>
@@ -50,14 +50,14 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '
 for (const it of ITENS) {
   const c = document.createElement('div'); c.className = 'card';
   c.innerHTML = `<div class="midia"><span class="n">${String(it.numero).padStart(2, '0')}</span>
-    <video muted loop playsinline preload="none" poster="${it.pasta}/poster.jpg" src="${it.pasta}/previa.mp4"></video><span class="toca">passe o mouse</span></div>
+    <video muted loop autoplay playsinline preload="metadata" poster="${it.pasta}/poster.jpg" src="${it.pasta}/previa.mp4"></video></div>
     <div class="t"><h2>${esc(it.nome)}</h2><div class="est">${esc(it.estilo)}</div>
     <div class="meta">${esc(it.tipo)} · ${esc(it.duracao_s)} s · ${esc((it.formato || '').split(',')[0])}</div>
     <p>${esc(it.descricao)}</p><p class="bom"><b>Bom para:</b> ${esc(it.bom_para)}</p>
     <button>Usar este estilo</button></div>`;
   const v = c.querySelector('video'), m = c.querySelector('.midia');
-  m.onmouseenter = () => v.play().catch(() => {}); m.onmouseleave = () => v.pause();
-  m.onclick = () => (v.paused ? v.play().catch(() => {}) : v.pause());
+  v.muted = true;
+  m.onclick = () => { v._parado = !v._parado; v._parado ? v.pause() : v.play().catch(() => {}); };
   c.querySelector('button').onclick = async () => {
     const t = tema.value.trim();
     const texto = `/motion-3d-por-referencia atlas:${String(it.numero).padStart(2, '0')} (${it.nome}). Meu tema: ${t || ''}`;
@@ -66,4 +66,12 @@ for (const it of ITENS) {
   };
   g.appendChild(c);
 }
+// todos em laço: toca o que está na tela e pausa o que saiu dela (clique no vídeo pausa ou retoma aquele)
+const videos = [...document.querySelectorAll('.midia video')];
+const tocar = v => { if (!v._parado) v.play().catch(() => {}); };
+if ('IntersectionObserver' in window) {
+  const olho = new IntersectionObserver(es => es.forEach(e => (e.isIntersecting ? tocar(e.target) : e.target.pause())), { rootMargin: '200px' });
+  videos.forEach(v => olho.observe(v));
+} else videos.forEach(tocar);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) videos.forEach(v => { const r = v.getBoundingClientRect(); if (r.bottom > -200 && r.top < innerHeight + 200) tocar(v); }); });
 </script></body></html>

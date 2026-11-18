@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
-"""Monta o Atlas que vai DENTRO da skill, a partir do acervo de motions aprovados.
+"""Monta o Atlas que vai DENTRO da skill gratuita, a partir do acervo da skill gratuita.
 
     empacotar-atlas.py PASTA_DO_ACERVO [--destino <skill>/atlas]        (ou defina MOTION_ACERVO)
+
+TRAVA: a pasta do acervo precisa ter um ACERVO.json com "skill": "gratuita". Qualquer outra pasta é recusada, para
+que os motions de outro acervo (os que são só dos alunos) nunca entrem na skill gratuita por engano.
 
 Para cada motion do acervo (pasta NN-nome com ficha.json) copia a ficha, o método, o prompt, a perícia e o código, e
 gera uma capa leve e uma prévia leve do vídeo (540 px). O vídeo original e os cards não vão: o acervo pesa centenas
@@ -67,7 +70,7 @@ main { max-width:1320px; margin:0 auto; padding:22px 28px 90px; }
   <div class="tema"><label for="tema">Seu tema (opcional)</label><input id="tema" placeholder="ex.: o que tem dentro de uma garrafa térmica, 8 s, vertical"></div>
 </div></header>
 <main>
-  <p class="sub">__N__ estilos feitos só com código (three.js). Passe o mouse ou toque para ver o movimento. Escolha um, clique em <b>Usar este estilo</b> e cole no Claude: ele parte do código pronto daquele motion e troca o conteúdo pelo seu tema. Do exemplo ficam a técnica, a edição e o ritmo; tema, textos, duração e formato são seus.</p>
+  <p class="sub">__N__ estilos feitos só com código (three.js). Todos rodam em laço; clique num vídeo para pausar. Escolha um, clique em <b>Usar este estilo</b> e cole no Claude: ele parte do código pronto daquele motion e troca o conteúdo pelo seu tema. Do exemplo ficam a técnica, a edição e o ritmo; tema, textos, duração e formato são seus.</p>
   <div class="grade" id="grade"></div>
 </main>
 <div id="aviso"></div>
@@ -79,14 +82,14 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '
 for (const it of ITENS) {
   const c = document.createElement('div'); c.className = 'card';
   c.innerHTML = `<div class="midia"><span class="n">${String(it.numero).padStart(2, '0')}</span>
-    <video muted loop playsinline preload="none" poster="${it.pasta}/poster.jpg" src="${it.pasta}/previa.mp4"></video><span class="toca">passe o mouse</span></div>
+    <video muted loop autoplay playsinline preload="metadata" poster="${it.pasta}/poster.jpg" src="${it.pasta}/previa.mp4"></video></div>
     <div class="t"><h2>${esc(it.nome)}</h2><div class="est">${esc(it.estilo)}</div>
     <div class="meta">${esc(it.tipo)} · ${esc(it.duracao_s)} s · ${esc((it.formato || '').split(',')[0])}</div>
     <p>${esc(it.descricao)}</p><p class="bom"><b>Bom para:</b> ${esc(it.bom_para)}</p>
     <button>Usar este estilo</button></div>`;
   const v = c.querySelector('video'), m = c.querySelector('.midia');
-  m.onmouseenter = () => v.play().catch(() => {}); m.onmouseleave = () => v.pause();
-  m.onclick = () => (v.paused ? v.play().catch(() => {}) : v.pause());
+  v.muted = true;
+  m.onclick = () => { v._parado = !v._parado; v._parado ? v.pause() : v.play().catch(() => {}); };
   c.querySelector('button').onclick = async () => {
     const t = tema.value.trim();
     const texto = `/motion-3d-por-referencia atlas:${String(it.numero).padStart(2, '0')} (${it.nome}). Meu tema: ${t || ''}`;
@@ -95,6 +98,14 @@ for (const it of ITENS) {
   };
   g.appendChild(c);
 }
+// todos em laço: toca o que está na tela e pausa o que saiu dela (clique no vídeo pausa ou retoma aquele)
+const videos = [...document.querySelectorAll('.midia video')];
+const tocar = v => { if (!v._parado) v.play().catch(() => {}); };
+if ('IntersectionObserver' in window) {
+  const olho = new IntersectionObserver(es => es.forEach(e => (e.isIntersecting ? tocar(e.target) : e.target.pause())), { rootMargin: '200px' });
+  videos.forEach(v => olho.observe(v));
+} else videos.forEach(tocar);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) videos.forEach(v => { const r = v.getBoundingClientRect(); if (r.bottom > -200 && r.top < innerHeight + 200) tocar(v); }); });
 </script></body></html>
 """
 
@@ -113,15 +124,35 @@ def limpar(arq):
         arq.write_text(n, encoding="utf-8")
 
 
+def conferir_acervo(orig):
+    """Só empacota o acervo da skill gratuita. Recusa antes de tocar em qualquer arquivo."""
+    marca = orig / "ACERVO.json"
+    try:
+        dono = json.loads(marca.read_text(encoding="utf-8")).get("skill")
+    except FileNotFoundError:
+        dono = None
+        motivo = "ela não tem ACERVO.json"
+    except Exception as e:
+        dono = None
+        motivo = "o ACERVO.json dela não pôde ser lido (%s)" % e
+    else:
+        motivo = 'o ACERVO.json dela diz "skill": %s' % json.dumps(dono, ensure_ascii=False)
+    if dono != "gratuita":
+        sys.exit("RECUSADO: %s não é o acervo da skill gratuita (%s).\n"
+                 'Este empacotador só aceita a pasta cujo ACERVO.json diz "skill": "gratuita" (motions-skill-gratuita/).\n'
+                 "Nada foi alterado." % (orig, motivo))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("acervo", nargs="?", default=os.environ.get("MOTION_ACERVO"))
     ap.add_argument("--destino", default=str(Path(__file__).resolve().parent.parent / "atlas"))
     a = ap.parse_args()
     if not a.acervo:
-        sys.exit("uso: empacotar-atlas.py PASTA_DO_ACERVO   (a pasta com os motions aprovados, NN-nome/ficha.json)")
-    precisa("ffmpeg")
+        sys.exit("uso: empacotar-atlas.py PASTA_DO_ACERVO   (o acervo da skill gratuita: NN-nome/ficha.json e ACERVO.json)")
     orig, dest = Path(a.acervo).expanduser(), Path(a.destino).expanduser()
+    conferir_acervo(orig)
+    precisa("ffmpeg")
     pastas = sorted(p.parent for p in orig.glob("[0-9][0-9]-*/ficha.json"))
     if not pastas:
         sys.exit("erro: não achei motions (pastas NN-nome com ficha.json) em %s" % orig)
